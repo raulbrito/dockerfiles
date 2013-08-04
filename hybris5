@@ -1,0 +1,17 @@
+FROM     nickstenning/java7 
+MAINTAINER Raul Brito "raul.brito@gmail.com"
+
+RUN apt-get install -y unzip
+
+ADD hybris-platform-5.0.2.0.zip /opt/
+RUN unzip /opt/hybris-platform-5.0.2.0.zip -d /opt
+RUN echo "#!/bin/bash\n. ./setantenv.sh\nant -Dinput.template=develop clean all" > /opt/hybris/bin/platform/build.sh && chmod u+x /opt/hybris/bin/platform/build.sh
+RUN cd /opt/hybris/bin/platform && ./build.sh 
+RUN chmod u+x /opt/hybris/bin/platform/hybrisserver.sh
+RUN echo "127.0.0.1 `hostname`" > /etc/hosts
+RUN echo "#!/bin/bash\n. ./setantenv.sh\nant initialize" > /opt/hybris/bin/platform/init.sh
+RUN chmod u+x /opt/hybris/bin/platform/init.sh
+RUN cd /opt/hybris/bin/platform && ./init.sh
+CMD /opt/hybris/bin/platform/hybrisserver.sh
+
+EXPOSE 9001
